@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.View;
 
 
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.robelseyoum3.foodrecipes.models.Recipe;
@@ -33,7 +34,18 @@ public class RecipeListActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recipe_list);
         mRecipeListViewModel = new ViewModelProvider(this).get(RecipeListViewModel.class);
+        subscribeObservers();
     }
+
+    private void subscribeObservers() {
+        mRecipeListViewModel.getRecipes().observe(this, new Observer<List<Recipe>>() {
+            @Override
+            public void onChanged(List<Recipe> recipes) {
+
+            }
+        });
+    }
+
     private void testRetrofitRequest(){
         RecipeApi recipeApi = ServiceGenerator.getRecipeApi();
 

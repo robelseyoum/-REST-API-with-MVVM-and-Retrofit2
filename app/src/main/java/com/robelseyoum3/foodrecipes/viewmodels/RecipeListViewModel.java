@@ -34,4 +34,12 @@ public class RecipeListViewModel extends ViewModel {
     public void isIsViewingRecipes(Boolean isViewingRecipes) {
         mIsViewingRecipes = isViewingRecipes;
     }
+
+    public boolean onBackPressed() {
+        if (mIsViewingRecipes) {
+            mIsViewingRecipes = false;
+            return false;
+        }
+        return true;
+    }
 }

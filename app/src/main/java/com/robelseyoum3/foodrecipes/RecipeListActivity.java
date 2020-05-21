@@ -2,6 +2,7 @@ package com.robelseyoum3.foodrecipes;
 
 
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.appcompat.widget.SearchView;
 import androidx.lifecycle.Observer;
@@ -13,6 +14,7 @@ import com.robelseyoum3.foodrecipes.adapters.OnRecipeListener;
 import com.robelseyoum3.foodrecipes.adapters.RecipeRecyclerAdapter;
 import com.robelseyoum3.foodrecipes.models.Recipe;
 import com.robelseyoum3.foodrecipes.util.Testing;
+import com.robelseyoum3.foodrecipes.util.VerticalSpacingItemDecorator;
 import com.robelseyoum3.foodrecipes.viewmodels.RecipeListViewModel;
 
 import java.util.List;
@@ -40,6 +42,8 @@ public class RecipeListActivity extends BaseActivity implements OnRecipeListener
 
     private void initRecyclerView() {
         mRecipeRecyclerAdapter = new RecipeRecyclerAdapter(this);
+        VerticalSpacingItemDecorator itemDecorator = new VerticalSpacingItemDecorator(30);
+        mRecyclerView.addItemDecoration(itemDecorator);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mRecyclerView.setAdapter(mRecipeRecyclerAdapter);
     }
@@ -49,8 +53,10 @@ public class RecipeListActivity extends BaseActivity implements OnRecipeListener
             @Override
             public void onChanged(List<Recipe> recipes) {
                 if (recipes != null) {
-                    Testing.printRecipes(recipes, "TestingSearchingRecipe");
-                    mRecipeRecyclerAdapter.setRecipes(recipes);
+                    if (mRecipeListViewModel.isIsViewingRecipes()) {
+                        Testing.printRecipes(recipes, "TestingSearchingRecipe");
+                        mRecipeRecyclerAdapter.setRecipes(recipes);
+                    }
                 }
             }
         });
@@ -75,7 +81,7 @@ public class RecipeListActivity extends BaseActivity implements OnRecipeListener
 
     @Override
     public void onRecipeClick(int position) {
-
+        Log.d(TAG, "onRecipeClick: clicked. " + position);
     }
 
     @Override
@@ -89,4 +95,12 @@ public class RecipeListActivity extends BaseActivity implements OnRecipeListener
         mRecipeRecyclerAdapter.displaySearchCategories();
     }
 
+    @Override
+    public void onBackPressed() {
+        if (mRecipeListViewModel.onBackPressed()) {
+            super.onBackPressed();
+        } else {
+            displaySearchCategories();
+        }
+    }
 }

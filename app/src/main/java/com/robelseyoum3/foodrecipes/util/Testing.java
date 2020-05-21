@@ -9,8 +9,10 @@ import java.util.List;
 public class Testing {
 
     public static void printRecipes(List<Recipe> list, String tag) {
+        int i = 0;
         for (Recipe recipe : list) {
-            Log.d(tag, "onChanged " + recipe.getTitle());
+            i++;
+            Log.d(tag, "onChanged " + i + " " + recipe.getTitle());
         }
     }
 

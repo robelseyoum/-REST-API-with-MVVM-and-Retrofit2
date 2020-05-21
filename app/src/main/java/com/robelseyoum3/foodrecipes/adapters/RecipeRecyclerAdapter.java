@@ -16,6 +16,8 @@ import java.util.List;
 
 public class RecipeRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
+    private static final int RECIPE_TYPE = 1;
+    private static final int LOADING_TYPE = 2;
     private List<Recipe> mRecipes;
     private OnRecipeListener onRecipeListener;
 
@@ -26,23 +28,35 @@ public class RecipeRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_recipe_list_item, parent, false);
-        return new RecipeViewHolder(view, onRecipeListener);
+        View view = null;
+        switch (viewType ){
+            case LOADING_TYPE : {
+                view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_recipe_list_item, parent, false);
+                return new LoadingViewHolder(view);
+            }
+            case RECIPE_TYPE:
+            default: {
+                view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_recipe_list_item, parent, false);
+                return new RecipeViewHolder(view, onRecipeListener);
+            }
+        }
     }
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+        int itemViewType = getItemViewType(position);
+        if(itemViewType == RECIPE_TYPE){
+            RequestOptions requestOptions = new RequestOptions()
+                    .placeholder(R.drawable.ic_launcher_background);
+            Glide.with(holder.itemView.getContext())
+                    .setDefaultRequestOptions(requestOptions)
+                    .load(mRecipes.get(position).getImage_url())
+                    .into(((RecipeViewHolder) holder).image);
 
-        RequestOptions requestOptions = new RequestOptions()
-                .placeholder(R.drawable.ic_launcher_background);
-        Glide.with(holder.itemView.getContext())
-                .setDefaultRequestOptions(requestOptions)
-                .load(mRecipes.get(position).getImage_url())
-                .into(((RecipeViewHolder) holder).image);
-
-        ((RecipeViewHolder) holder).title.setText(mRecipes.get(position).getTitle());
-        ((RecipeViewHolder) holder).publisher.setText(mRecipes.get(position).getPublisher());
-        ((RecipeViewHolder) holder).socialScore.setText(String.valueOf(Math.round(Float.parseFloat(mRecipes.get(position).getSocial_rank()))));
+            ((RecipeViewHolder) holder).title.setText(mRecipes.get(position).getTitle());
+            ((RecipeViewHolder) holder).publisher.setText(mRecipes.get(position).getPublisher());
+            ((RecipeViewHolder) holder).socialScore.setText(String.valueOf(Math.round(Float.parseFloat(mRecipes.get(position).getSocial_rank()))));
+        }
     }
 
     @Override

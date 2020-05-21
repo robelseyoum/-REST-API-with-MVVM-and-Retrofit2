@@ -11,9 +11,9 @@ public class Recipe implements Parcelable {
     private String[] ingredients;
     private String recipe_id;
     private String image_url;
-    private String social_rank;
+    private float social_rank;
 
-    public Recipe(String title, String publisher, String[] ingredients, String recipe_id, String image_url, String social_rank) {
+    public Recipe(String title, String publisher, String[] ingredients, String recipe_id, String image_url, float social_rank) {
         this.title = title;
         this.publisher = publisher;
         this.ingredients = ingredients;
@@ -31,7 +31,7 @@ public class Recipe implements Parcelable {
         ingredients = in.createStringArray();
         recipe_id = in.readString();
         image_url = in.readString();
-        social_rank = in.readString();
+        social_rank = in.readFloat();
     }
 
     public static final Creator<Recipe> CREATOR = new Creator<Recipe>() {
@@ -86,11 +86,11 @@ public class Recipe implements Parcelable {
         this.image_url = image_url;
     }
 
-    public String getSocial_rank() {
+    public float getSocial_rank() {
         return social_rank;
     }
 
-    public void setSocial_rank(String social_rank) {
+    public void setSocial_rank(float social_rank) {
         this.social_rank = social_rank;
     }
 
@@ -118,6 +118,6 @@ public class Recipe implements Parcelable {
         dest.writeStringArray(ingredients);
         dest.writeString(recipe_id);
         dest.writeString(image_url);
-        dest.writeString(social_rank);
+        dest.writeFloat(social_rank);
     }
 }

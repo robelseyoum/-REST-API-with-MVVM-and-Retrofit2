@@ -3,6 +3,7 @@ package com.robelseyoum3.foodrecipes;
 
 import android.os.Bundle;
 
+import androidx.appcompat.widget.SearchView;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -29,7 +30,7 @@ public class RecipeListActivity extends BaseActivity implements OnRecipeListener
         mRecipeListViewModel = new ViewModelProvider(this).get(RecipeListViewModel.class);
         mRecyclerView = findViewById(R.id.recycler_recipe_list);
         initRecyclerView();
-        testRetrofitRequest();
+        initSearchView();
         subscribeObservers();
     }
 
@@ -51,12 +52,20 @@ public class RecipeListActivity extends BaseActivity implements OnRecipeListener
         });
     }
 
-    private void searchRecipesApi(String query, int pageNumber) {
-        mRecipeListViewModel.searchRecipesApi(query, pageNumber);
-    }
+    private void initSearchView() {
+        final SearchView searchView = findViewById(R.id.search_view);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                mRecipeListViewModel.searchRecipesApi(query, 1);
+                return false;
+            }
 
-    private void testRetrofitRequest(){
-        searchRecipesApi("chicken", 1);
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
     }
 
     @Override

@@ -29,6 +29,10 @@ public class RecipeRepository {
         return mRecipeApiClient.getRecipes();
     }
 
+    public LiveData<Boolean> isRecipeRequestTimeOut() {
+        return mRecipeApiClient.isRecipeRequestTimeOut();
+    }
+
     public LiveData<Recipe> getRecipe() {
         return mRecipeApiClient.getRecipe();
     }
@@ -43,7 +47,7 @@ public class RecipeRepository {
     }
 
     public void searchRecipeApiById(String recipeID) {
-        mRecipeApiClient.searchRecipeApi(recipeID);
+        mRecipeApiClient.searchRecipeApiById(recipeID);
     }
 
     public void searchNextPage() {

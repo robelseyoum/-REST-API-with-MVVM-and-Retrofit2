@@ -71,9 +71,34 @@ public class RecipeActivity extends BaseActivity {
             public void onChanged(Boolean aBoolean) {
                 if (aBoolean && !mRecipeViewModel.isDidRetrieved()) {
                     Log.d(TAG, "onChanged: timed out....");
+                    displayErrorScreen("Error retrieving data. Check network connection");
                 }
             }
         });
+    }
+
+    private void displayErrorScreen(String errorMessage) {
+        mRecipeTitle.setText("Error retrieving recipe...");
+        mRecipeRank.setText("");
+        TextView textView = new TextView(this);
+        if (!errorMessage.equals("")) {
+            textView.setText(errorMessage);
+        } else {
+            textView.setText("Error");
+        }
+        textView.setLayoutParams(new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        mRecipeIngredientsContainer.addView(textView);
+
+        RequestOptions requestOptions = new RequestOptions()
+                .placeholder(R.drawable.ic_launcher_background);
+
+        Glide.with(this)
+                .setDefaultRequestOptions(requestOptions)
+                .load(R.drawable.ic_launcher_background)
+                .into(mRecipeImage);
+        showParent();
+        showProgressBAr(false);
     }
 
     private void setRecipeProperties(Recipe recipe) {
@@ -87,7 +112,7 @@ public class RecipeActivity extends BaseActivity {
                     .into(mRecipeImage);
 
             mRecipeTitle.setText(recipe.getTitle());
-            mRecipeTitle.setText(String.valueOf(Math.round(recipe.getSocial_rank())));
+            mRecipeRank.setText(String.valueOf(Math.round(recipe.getSocial_rank())));
 
             mRecipeIngredientsContainer.removeAllViews();
             for (String ingredient : recipe.getIngredients()) {

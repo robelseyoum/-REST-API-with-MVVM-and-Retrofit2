@@ -3,8 +3,12 @@ package com.robelseyoum3.foodrecipes;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.widget.SearchView;
+import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -40,6 +44,7 @@ public class RecipeListActivity extends BaseActivity implements OnRecipeListener
             //display search categories
             displaySearchCategories();
         }
+        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
     }
 
     private void initRecyclerView() {
@@ -48,6 +53,16 @@ public class RecipeListActivity extends BaseActivity implements OnRecipeListener
         mRecyclerView.addItemDecoration(itemDecorator);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mRecyclerView.setAdapter(mRecipeRecyclerAdapter);
+
+        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                if (!mRecyclerView.canScrollVertically(1)) {
+                    //search teh next page
+                    mRecipeListViewModel.searchNextPage();
+                }
+            }
+        });
     }
 
     private void subscribeObservers() {
@@ -106,5 +121,19 @@ public class RecipeListActivity extends BaseActivity implements OnRecipeListener
         } else {
             displaySearchCategories();
         }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.action_categories) {
+            displaySearchCategories();
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.recipe_search_menu, menu);
+        return super.onCreateOptionsMenu(menu);
     }
 }

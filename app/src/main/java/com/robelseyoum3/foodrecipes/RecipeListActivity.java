@@ -1,6 +1,7 @@
 package com.robelseyoum3.foodrecipes;
 
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -20,6 +21,7 @@ import com.robelseyoum3.foodrecipes.models.Recipe;
 import com.robelseyoum3.foodrecipes.util.Testing;
 import com.robelseyoum3.foodrecipes.util.VerticalSpacingItemDecorator;
 import com.robelseyoum3.foodrecipes.viewmodels.RecipeListViewModel;
+import com.robelseyoum3.foodrecipes.viewmodels.RecipeViewModel;
 
 import java.util.List;
 
@@ -29,6 +31,7 @@ public class RecipeListActivity extends BaseActivity implements OnRecipeListener
     private RecyclerView mRecyclerView;
     private RecipeRecyclerAdapter mRecipeRecyclerAdapter;
     private SearchView mSearchView;
+    private RecipeViewModel mRecipeViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,6 +103,9 @@ public class RecipeListActivity extends BaseActivity implements OnRecipeListener
     @Override
     public void onRecipeClick(int position) {
         Log.d(TAG, "onRecipeClick: clicked. " + position);
+        Intent intent = new Intent(this, RecipeActivity.class);
+        intent.putExtra("recipe", mRecipeRecyclerAdapter.getSelectedRecipe(position));
+        startActivity(intent);
     }
 
     @Override

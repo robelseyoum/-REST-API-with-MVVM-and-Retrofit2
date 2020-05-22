@@ -9,6 +9,7 @@ import com.robelseyoum3.foodrecipes.repositories.RecipeRepository;
 public class RecipeViewModel extends ViewModel {
 
     private RecipeRepository mRecipeRepository;
+    private String mRecipeId;
 
     public RecipeViewModel() {
         this.mRecipeRepository = RecipeRepository.getInstance();
@@ -19,8 +20,11 @@ public class RecipeViewModel extends ViewModel {
     }
 
     public void searchRecipeById(String recipeID) {
+        mRecipeId = recipeID;
         mRecipeRepository.searchRecipeApiById(recipeID);
     }
 
-
+    public String getRecipeId() {
+        return mRecipeId;
+    }
 }

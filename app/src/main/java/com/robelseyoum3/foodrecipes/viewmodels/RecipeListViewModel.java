@@ -1,66 +1,35 @@
 package com.robelseyoum3.foodrecipes.viewmodels;
 
+
+import android.app.Application;
+
+import androidx.annotation.NonNull;
+import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.MutableLiveData;
 
-import com.robelseyoum3.foodrecipes.models.Recipe;
-import com.robelseyoum3.foodrecipes.repositories.RecipeRepository;
+public class RecipeListViewModel extends AndroidViewModel {
 
-import java.util.List;
+    private static final String TAG = "RecipeListViewModel";
 
-public class RecipeListViewModel extends ViewModel {
+    public enum ViewState {CATEGORIES, RECIPES}
 
-    private RecipeRepository mRecipeRepository;
-    private boolean mIsViewingRecipes;
-    private boolean mIsPerformingQuery;
+    ;
+    private MutableLiveData<ViewState> viewState;
 
-    public RecipeListViewModel() {
-        mIsViewingRecipes = false;
-        mRecipeRepository = RecipeRepository.getInstance();
+    public RecipeListViewModel(@NonNull Application application) {
+        super(application);
+        init();
     }
 
-    public LiveData<List<Recipe>> getRecipes() {
-        return mRecipeRepository.getRecipes();
-    }
-
-    public void searchRecipesApi(String query, int pageNumber) {
-        mIsViewingRecipes = true;
-        mIsPerformingQuery = true;
-        mRecipeRepository.searchRecipesApi(query, pageNumber);
-    }
-
-    public boolean isPerformingQuery() {
-        return mIsPerformingQuery;
-    }
-
-    public void setPerformingQuery(Boolean isPerformingQuery) {
-        mIsPerformingQuery = isPerformingQuery;
-    }
-
-    public boolean isIsViewingRecipes() {
-        return mIsViewingRecipes;
-    }
-
-    public void isIsViewingRecipes(Boolean isViewingRecipes) {
-        mIsViewingRecipes = isViewingRecipes;
-    }
-
-    public void searchNextPage() {
-        if (!mIsPerformingQuery && mIsViewingRecipes) {
-            mRecipeRepository.searchNextPage();
+    private void init() {
+        if (viewState == null) {
+            viewState = new MutableLiveData<>();
+            viewState.setValue(ViewState.CATEGORIES);
         }
     }
 
-    public boolean onBackPressed() {
-        if (isPerformingQuery()) {
-            //cancel the request query send message to repo
-            mRecipeRepository.cancelRequest();
-            mIsPerformingQuery = false;
-        }
-        if (mIsViewingRecipes) {
-            mIsViewingRecipes = false;
-            return false;
-        }
-        return true;
+    public LiveData<ViewState> getViewState() {
+        return viewState;
     }
 }

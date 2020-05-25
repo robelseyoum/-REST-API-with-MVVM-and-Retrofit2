@@ -10,7 +10,7 @@ public class Resource<T> {
     @Nullable
     public final T data;
     @Nullable
-    public final String message;
+    private final String message;
 
     private Resource(@NonNull Status status, @Nullable T data, @Nullable String message) {
         this.status = status;
@@ -22,8 +22,8 @@ public class Resource<T> {
         return new Resource<>(Status.SUCCESS, data, null);
     }
 
-    public static <T> Resource<T> error(String msg, @Nullable T data) {
-        return new Resource<>(Status.ERROR, data, null);
+    public static <T> Resource<T> error(@NonNull String msg, @Nullable T data) {
+        return new Resource<>(Status.ERROR, data, msg);
     }
 
     public static <T> Resource<T> loading(@Nullable T data) {

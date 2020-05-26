@@ -1,9 +1,11 @@
 package com.robelseyoum3.foodrecipes.requests;
 
+import androidx.lifecycle.LiveData;
+
+import com.robelseyoum3.foodrecipes.requests.response.ApiResponse;
 import com.robelseyoum3.foodrecipes.requests.response.RecipeResponse;
 import com.robelseyoum3.foodrecipes.requests.response.RecipeSearchResponse;
 
-import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
 
@@ -15,14 +17,14 @@ public interface RecipeApi {
 
     //SEARCH
     @GET("/api/search")
-    Call<RecipeSearchResponse> searchRecipe(
+    LiveData<ApiResponse<RecipeSearchResponse>> searchRecipe(
             @Query("q") String key, //appends ?
             @Query("page") String page //appends &
     );
 
     //GET RECIPE REQUEST
     @GET("/api/get")
-    Call<RecipeResponse> getRecipe(
+    LiveData<ApiResponse<RecipeResponse>> getRecipe(
       @Query("rId") String recipe_id
     );
 }

@@ -10,6 +10,7 @@ import com.robelseyoum3.foodrecipes.AppExecutors;
 import com.robelseyoum3.foodrecipes.models.Recipe;
 import com.robelseyoum3.foodrecipes.persistence.RecipeDao;
 import com.robelseyoum3.foodrecipes.persistence.RecipeDatabase;
+import com.robelseyoum3.foodrecipes.requests.ServiceGenerator;
 import com.robelseyoum3.foodrecipes.requests.response.ApiResponse;
 import com.robelseyoum3.foodrecipes.requests.response.RecipeSearchResponse;
 import com.robelseyoum3.foodrecipes.util.NetworkBoundResource;
@@ -55,7 +56,10 @@ public class RecipeRepository {
             @NonNull
             @Override
             protected LiveData<ApiResponse<RecipeSearchResponse>> createCall() {
-                return null;
+                return ServiceGenerator.getRecipeApi().searchRecipe(
+                        query,
+                        String.valueOf(pageNumber)
+                );
             }
         }.getAsLiveData();
     }

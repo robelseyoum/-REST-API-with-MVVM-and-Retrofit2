@@ -1,102 +1,63 @@
 package com.robelseyoum3.foodrecipes.repositories;
 
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MediatorLiveData;
-import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.Observer;
+import android.content.Context;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.lifecycle.LiveData;
+
+import com.robelseyoum3.foodrecipes.AppExecutors;
 import com.robelseyoum3.foodrecipes.models.Recipe;
-import com.robelseyoum3.foodrecipes.requests.RecipeApiClient;
+import com.robelseyoum3.foodrecipes.persistence.RecipeDao;
+import com.robelseyoum3.foodrecipes.persistence.RecipeDatabase;
+import com.robelseyoum3.foodrecipes.requests.response.ApiResponse;
+import com.robelseyoum3.foodrecipes.requests.response.RecipeSearchResponse;
+import com.robelseyoum3.foodrecipes.util.NetworkBoundResource;
+import com.robelseyoum3.foodrecipes.util.Resource;
 
 import java.util.List;
 
 public class RecipeRepository {
 
     private static RecipeRepository instance;
-    private RecipeApiClient mRecipeApiClient;
-    private String mQuery;
-    private int mPageNumber;
-    private MutableLiveData<Boolean> mIsQueryExhausted = new MutableLiveData<>();
-    private MediatorLiveData<List<Recipe>> mRecipes = new MediatorLiveData<>();
+    private RecipeDao recipeDao;
 
-    public static RecipeRepository getInstance() {
+    public static RecipeRepository getInstance(Context context) {
         if(instance == null){
-            instance = new RecipeRepository();
+            instance = new RecipeRepository(context);
         }
         return instance;
     }
 
-    private RecipeRepository(){
-        mRecipeApiClient = RecipeApiClient.getInstance();
-        initMediators();
+    public RecipeRepository(Context context) {
+        recipeDao = RecipeDatabase.getInstance(context).getRecipeDao();
     }
 
-    private void initMediators() {
-        LiveData<List<Recipe>> recipeListApiSource = mRecipeApiClient.getRecipes();
-        mRecipes.addSource(recipeListApiSource, new Observer<List<Recipe>>() {
+    public LiveData<Resource<List<Recipe>>> searchRecipesApi(final String query, final int pageNumber) {
+        return new NetworkBoundResource<List<Recipe>, RecipeSearchResponse>(AppExecutors.getInstance()) {
+
             @Override
-            public void onChanged(List<Recipe> recipes) {
-                if (recipes != null) {
-                    mRecipes.setValue(recipes);
-                    doneQuery(recipes);
-                } else {
-                    //search database cache
-                    doneQuery(null);
-                }
+            protected void saveCallResult(@NonNull RecipeSearchResponse item) {
+
             }
-        });
-    }
 
-    private void doneQuery(List<Recipe> list) {
-        if (list != null) {
-            if (list.size() % 30 != 0) {
-                mIsQueryExhausted.setValue(true);
+            @Override
+            protected boolean shouldFetch(@Nullable List<Recipe> data) {
+                return true;
             }
-        } else {
-            mIsQueryExhausted.setValue(true);
-        }
-    }
 
-//    public LiveData<List<Recipe>> getRecipes(){
-//        return mRecipeApiClient.getRecipes();
-//    }
+            @Nullable
+            @Override
+            protected LiveData<List<Recipe>> loadFromDb() {
+                return recipeDao.searchRecipes(query, pageNumber);
+            }
 
-    public LiveData<List<Recipe>> getRecipes(){
-        return mRecipes;
-    }
-
-    public LiveData<Boolean> isRecipeRequestTimeOut() {
-        return mRecipeApiClient.isRecipeRequestTimeOut();
-    }
-
-    public LiveData<Boolean> isQueryExhausted() {
-        return mIsQueryExhausted;
-    }
-
-    public LiveData<Recipe> getRecipe() {
-        return mRecipeApiClient.getRecipe();
-    }
-
-    public void searchRecipesApi(String query, int pageNumber) {
-        if (pageNumber == 0) {
-            pageNumber = 1;
-        }
-        mQuery = query;
-        mPageNumber = pageNumber;
-        mIsQueryExhausted.setValue(false);
-        mRecipeApiClient.searchRecipesApi(query, pageNumber);
-    }
-
-    public void searchRecipeApiById(String recipeID) {
-        mRecipeApiClient.searchRecipeApiById(recipeID);
-    }
-
-    public void searchNextPage() {
-        searchRecipesApi(mQuery, mPageNumber + 1);
-    }
-
-    public void cancelRequest() {
-        mRecipeApiClient.cancelRequest();
+            @NonNull
+            @Override
+            protected LiveData<ApiResponse<RecipeSearchResponse>> createCall() {
+                return null;
+            }
+        }.getAsLiveData();
     }
 
 }

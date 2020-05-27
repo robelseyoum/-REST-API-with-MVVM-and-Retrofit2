@@ -10,8 +10,8 @@ public class MyViewModelFactory implements ViewModelProvider.Factory {
 
     private Application mApplication;
 
-    public MyViewModelFactory(Application mApplication) {
-        mApplication = mApplication;
+    public MyViewModelFactory(Application application) {
+        mApplication = application;
     }
 
     @NonNull

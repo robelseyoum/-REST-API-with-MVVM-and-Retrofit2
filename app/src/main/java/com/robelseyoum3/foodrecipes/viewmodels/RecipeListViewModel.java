@@ -2,6 +2,7 @@ package com.robelseyoum3.foodrecipes.viewmodels;
 
 
 import android.app.Application;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -20,12 +21,20 @@ public class RecipeListViewModel extends AndroidViewModel {
 
     private static final String TAG = "RecipeListViewModel";
 
+    public static final String QUERY_EXHORTED = "No more results...";
+
     public enum ViewState {CATEGORIES, RECIPES}
 
     ;
     private MutableLiveData<ViewState> viewState;
     private MediatorLiveData<Resource<List<Recipe>>> recipes = new MediatorLiveData<>();
     private RecipeRepository mRecipeRepository;
+
+    //query extras
+    private boolean isQueryExhausted;
+    private boolean isPerformingQuery;
+    private int pageNumber;
+    private String query;
 
     public RecipeListViewModel(@NonNull Application application) {
         super(application);
@@ -48,13 +57,53 @@ public class RecipeListViewModel extends AndroidViewModel {
         return recipes;
     }
 
+    public int getPageNumber() {
+        return pageNumber;
+    }
+
+
     public void searchRecipesApi(String query, int pageNumber) {
-        final LiveData<Resource<List<Recipe>>> resourceLiveData = mRecipeRepository.searchRecipesApi(query, pageNumber);
-        recipes.addSource(resourceLiveData, new Observer<Resource<List<Recipe>>>() {
+        if (!isPerformingQuery) {
+            if (pageNumber == 0) {
+                pageNumber = 1;
+            }
+            this.pageNumber = pageNumber;
+            this.query = query;
+            isQueryExhausted = false;
+            executeSearch();
+        }
+    }
+
+    private void executeSearch() {
+        isPerformingQuery = true;
+        viewState.setValue(ViewState.RECIPES);
+        final LiveData<Resource<List<Recipe>>> repositorySource = mRecipeRepository.searchRecipesApi(query, pageNumber);
+        recipes.addSource(repositorySource, new Observer<Resource<List<Recipe>>>() {
             @Override
             public void onChanged(Resource<List<Recipe>> listResource) {
-                //react to the data
-                recipes.setValue(listResource);
+                if (listResource != null) {
+                    recipes.setValue(listResource);
+                    if (listResource.status == Resource.Status.SUCCESS) {
+                        isPerformingQuery = false;
+                        if (listResource.data != null) {
+                            if (listResource.data.size() == 0) {
+                                Log.d(TAG, "onChanged: query is exhausted");
+                                recipes.setValue(
+                                        new Resource<List<Recipe>>(
+                                                Resource.Status.ERROR,
+                                                listResource.data,
+                                                QUERY_EXHORTED
+                                        ));
+                            }
+                        }
+                        recipes.removeSource(repositorySource);
+                    } else if (listResource.status == Resource.Status.ERROR) {
+                        isPerformingQuery = false;
+                        recipes.removeSource(repositorySource);
+                    }
+                } else {
+                    recipes.removeSource(repositorySource);
+                }
             }
         });
     }

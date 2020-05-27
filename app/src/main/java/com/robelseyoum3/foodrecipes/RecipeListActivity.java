@@ -72,6 +72,7 @@ public class RecipeListActivity extends BaseActivity implements OnRecipeListener
                     Log.d(TAG, "onChanged: status: " + listResource.status);
                     if (listResource.data != null) {
                         Testing.printRecipes(listResource.data, "data");
+                        mRecipeRecyclerAdapter.setRecipes(listResource.data);
                     }
                 }
             }

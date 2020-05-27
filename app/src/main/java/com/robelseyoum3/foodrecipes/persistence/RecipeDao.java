@@ -17,7 +17,7 @@ import static androidx.room.OnConflictStrategy.REPLACE;
 public interface RecipeDao {
 
     @Insert(onConflict = IGNORE)
-    long[] insertRecipes(Recipe... recipe);
+    long[] insertRecipes(Recipe... recipe); //return -1 if db is not inserted into db
 
     @Insert(onConflict = REPLACE)
     void insertRecipes(Recipe recipe);

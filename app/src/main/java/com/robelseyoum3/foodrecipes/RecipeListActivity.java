@@ -16,7 +16,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
+import com.bumptech.glide.integration.recyclerview.RecyclerViewPreloader;
 import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.util.ViewPreloadSizeProvider;
 import com.robelseyoum3.foodrecipes.adapters.OnRecipeListener;
 import com.robelseyoum3.foodrecipes.adapters.RecipeRecyclerAdapter;
 import com.robelseyoum3.foodrecipes.models.Recipe;
@@ -135,10 +137,20 @@ public class RecipeListActivity extends BaseActivity implements OnRecipeListener
     }
 
     private void initRecyclerView() {
-        mRecipeRecyclerAdapter = new RecipeRecyclerAdapter(this, initGlide());
+        ViewPreloadSizeProvider<String> viewPreloadSizeProvider = new ViewPreloadSizeProvider<>();
+        mRecipeRecyclerAdapter = new RecipeRecyclerAdapter(this, initGlide(), viewPreloadSizeProvider);
         VerticalSpacingItemDecorator itemDecorator = new VerticalSpacingItemDecorator(30);
         mRecyclerView.addItemDecoration(itemDecorator);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        //assigning preloaded cache for how many images need ahead of time
+        RecyclerViewPreloader<String> preloader = new RecyclerViewPreloader<String>(
+                Glide.with(this),
+                mRecipeRecyclerAdapter,
+                viewPreloadSizeProvider,
+                30);
+
+        mRecyclerView.addOnScrollListener(preloader);
 
         mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -184,4 +196,13 @@ public class RecipeListActivity extends BaseActivity implements OnRecipeListener
         searchRecipeApi(category);
     }
 
+    @Override
+    public void onBackPressed() {
+        if (mRecipeListViewModel.getViewState().getValue() == RecipeListViewModel.ViewState.CATEGORIES) {
+            super.onBackPressed();
+        } else {
+            mRecipeListViewModel.cancelSearchRequest();
+            mRecipeListViewModel.setViewCategories();
+        }
+    }
 }

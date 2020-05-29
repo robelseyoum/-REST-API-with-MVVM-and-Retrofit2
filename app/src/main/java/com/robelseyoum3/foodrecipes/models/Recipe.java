@@ -32,6 +32,9 @@ public class Recipe implements Parcelable {
     @ColumnInfo(name = "ingredients")
     private String[] ingredients;
 
+    /**
+     * Saves current timestamp in **SECONDS**
+     */
     @ColumnInfo(name = "timestamp")
     private int timestamp;
 

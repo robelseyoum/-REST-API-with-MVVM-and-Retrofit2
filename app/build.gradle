@@ -41,6 +41,7 @@ dependencies {
     def arch_version = "2.1.0"
     def supportVersion = "28.0.0"
     def glideVersion = "4.11.0"
+    def okHttpVersion = "4.7.2"
 
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
@@ -49,6 +50,9 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+
+    //okhttp3
+    implementation("com.squareup.okhttp3:okhttp:$okHttpVersion")
 
     //retrofitVersion
     implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
@@ -96,6 +100,11 @@ dependencies {
     implementation "com.github.bumptech.glide:glide:$glideVersion"
     annotationProcessor "com.github.bumptech.glide:compiler:$glideVersion"
 
+    implementation ("com.github.bumptech.glide:recyclerview-integration:$glideVersion") {
+        // Excludes the support library because it's already included by Glide.
+        transitive = false
+    }
+
     //circle image file
     implementation 'de.hdodenhof:circleimageview:3.1.0'
 
@@ -105,5 +114,7 @@ dependencies {
 
     //see db data
     debugImplementation 'com.amitshekhar.android:debug-db:1.0.6'
+
+
 
 }

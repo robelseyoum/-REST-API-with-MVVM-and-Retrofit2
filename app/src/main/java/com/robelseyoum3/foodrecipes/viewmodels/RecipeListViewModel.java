@@ -23,6 +23,7 @@ public class RecipeListViewModel extends AndroidViewModel {
 
     public static final String QUERY_EXHORTED = "No more results...";
 
+
     public enum ViewState {CATEGORIES, RECIPES}
 
     ;
@@ -35,6 +36,8 @@ public class RecipeListViewModel extends AndroidViewModel {
     private boolean isPerformingQuery;
     private int pageNumber;
     private String query;
+    private boolean cancelRequest;
+    private long requestStartTime;
 
     public RecipeListViewModel(@NonNull Application application) {
         super(application);
@@ -61,7 +64,9 @@ public class RecipeListViewModel extends AndroidViewModel {
         return pageNumber;
     }
 
-
+    public void setViewCategories() {
+        viewState.setValue(ViewState.CATEGORIES);
+    }
     public void searchRecipesApi(String query, int pageNumber) {
         if (!isPerformingQuery) {
             if (pageNumber == 0) {
@@ -82,30 +87,38 @@ public class RecipeListViewModel extends AndroidViewModel {
     }
 
     private void executeSearch() {
+        requestStartTime = System.currentTimeMillis();
+        cancelRequest = false;
         isPerformingQuery = true;
         viewState.setValue(ViewState.RECIPES);
         final LiveData<Resource<List<Recipe>>> repositorySource = mRecipeRepository.searchRecipesApi(query, pageNumber);
         recipes.addSource(repositorySource, new Observer<Resource<List<Recipe>>>() {
             @Override
             public void onChanged(Resource<List<Recipe>> listResource) {
-                if (listResource != null) {
-                    recipes.setValue(listResource);
-                    if (listResource.status == Resource.Status.SUCCESS) {
-                        isPerformingQuery = false;
-                        if (listResource.data != null) {
-                            if (listResource.data.size() == 0) {
-                                Log.d(TAG, "onChanged: query is exhausted");
-                                recipes.setValue(
-                                        new Resource<List<Recipe>>(
-                                                Resource.Status.ERROR,
-                                                listResource.data,
-                                                QUERY_EXHORTED
-                                        ));
+                if (!cancelRequest) {
+                    if (listResource != null) {
+                        recipes.setValue(listResource);
+                        if (listResource.status == Resource.Status.SUCCESS) {
+                            Log.d(TAG, "onChanged: REQUEST TIME: " + (System.currentTimeMillis() - requestStartTime) / 1000 + " seconds.");
+                            isPerformingQuery = false;
+                            if (listResource.data != null) {
+                                if (listResource.data.size() == 0) {
+                                    Log.d(TAG, "onChanged: query is exhausted");
+                                    recipes.setValue(
+                                            new Resource<List<Recipe>>(
+                                                    Resource.Status.ERROR,
+                                                    listResource.data,
+                                                    QUERY_EXHORTED
+                                            ));
+                                }
                             }
+                            recipes.removeSource(repositorySource);
+                        } else if (listResource.status == Resource.Status.ERROR) {
+                            Log.d(TAG, "onChanged: REQUEST TIME: " + (System.currentTimeMillis() - requestStartTime) / 1000 + " seconds.");
+                            isPerformingQuery = false;
+                            recipes.removeSource(repositorySource);
                         }
-                        recipes.removeSource(repositorySource);
-                    } else if (listResource.status == Resource.Status.ERROR) {
-                        isPerformingQuery = false;
+                    } else {
                         recipes.removeSource(repositorySource);
                     }
                 } else {
@@ -113,5 +126,14 @@ public class RecipeListViewModel extends AndroidViewModel {
                 }
             }
         });
+    }
+
+    public void cancelSearchRequest() {
+        if (isPerformingQuery) {
+            Log.d(TAG, "cancelSearchRequest: canceling the search request");
+            cancelRequest = true;
+            isPerformingQuery = false;
+            pageNumber = 1;
+        }
     }
 }

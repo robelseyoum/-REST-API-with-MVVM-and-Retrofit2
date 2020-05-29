@@ -20,7 +20,7 @@ public interface RecipeDao {
     long[] insertRecipes(Recipe... recipe); //return -1 if db is not inserted into db
 
     @Insert(onConflict = REPLACE)
-    void insertRecipes(Recipe recipe);
+    void insertRecipe(Recipe recipe);
 
     @Query("UPDATE recipes SET title = :title, publisher = :publisher, image_url = :image_url, social_rank = :social_rank WHERE recipe_id = :recipe_id")
     void updateRecipe(String recipe_id, String title, String publisher, String image_url, float social_rank);

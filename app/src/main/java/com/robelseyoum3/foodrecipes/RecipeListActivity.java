@@ -4,6 +4,7 @@ package com.robelseyoum3.foodrecipes;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
@@ -16,12 +17,13 @@ import com.robelseyoum3.foodrecipes.adapters.OnRecipeListener;
 import com.robelseyoum3.foodrecipes.adapters.RecipeRecyclerAdapter;
 import com.robelseyoum3.foodrecipes.models.Recipe;
 import com.robelseyoum3.foodrecipes.util.Resource;
-import com.robelseyoum3.foodrecipes.util.Testing;
 import com.robelseyoum3.foodrecipes.util.VerticalSpacingItemDecorator;
 import com.robelseyoum3.foodrecipes.viewmodels.MyViewModelFactory;
 import com.robelseyoum3.foodrecipes.viewmodels.RecipeListViewModel;
 
 import java.util.List;
+
+import static com.robelseyoum3.foodrecipes.viewmodels.RecipeListViewModel.QUERY_EXHORTED;
 
 
 public class RecipeListActivity extends BaseActivity implements OnRecipeListener {
@@ -71,8 +73,37 @@ public class RecipeListActivity extends BaseActivity implements OnRecipeListener
                 if (listResource != null) {
                     Log.d(TAG, "onChanged: status: " + listResource.status);
                     if (listResource.data != null) {
-                        Testing.printRecipes(listResource.data, "data");
-                        mRecipeRecyclerAdapter.setRecipes(listResource.data);
+//                        Testing.printRecipes(listResource.data, "data");
+//                        mRecipeRecyclerAdapter.setRecipes(listResource.data);
+                        switch (listResource.status) {
+                            case LOADING: {
+                                if (mRecipeListViewModel.getPageNumber() > 1) {
+                                    mRecipeRecyclerAdapter.displayLoading();
+                                } else {
+                                    mRecipeRecyclerAdapter.displayOnlyLoading();
+                                }
+                                break;
+                            }
+                            case ERROR: {
+                                Log.e(TAG, "onChanged: cannot refresh the cach.");
+                                Log.e(TAG, "onChanged: ERROR message: " + listResource.message);
+                                Log.e(TAG, "onChanged: ERROR, #recipes: " + listResource.data.size());
+                                mRecipeRecyclerAdapter.hideLoading();
+                                mRecipeRecyclerAdapter.setRecipes(listResource.data);
+                                Toast.makeText(RecipeListActivity.this, listResource.message, Toast.LENGTH_SHORT).show();
+                                if (listResource.message.equals(QUERY_EXHORTED)) {
+                                    mRecipeRecyclerAdapter.setQueryExhausted();
+                                }
+                                break;
+                            }
+                            case SUCCESS: {
+                                Log.e(TAG, "onChanged: cache has been refreshed.");
+                                Log.e(TAG, "onChanged: SUCCESS, #recipes: " + listResource.data.size());
+                                mRecipeRecyclerAdapter.hideLoading();
+                                mRecipeRecyclerAdapter.setRecipes(listResource.data);
+                                break;
+                            }
+                        }
                     }
                 }
             }

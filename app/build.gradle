@@ -102,4 +102,8 @@ dependencies {
     //room db
     implementation "androidx.room:room-runtime:$lifecycle_version"
     annotationProcessor "androidx.room:room-compiler:$lifecycle_version"
+
+    //see db data
+    debugImplementation 'com.amitshekhar.android:debug-db:1.0.6'
+
 }

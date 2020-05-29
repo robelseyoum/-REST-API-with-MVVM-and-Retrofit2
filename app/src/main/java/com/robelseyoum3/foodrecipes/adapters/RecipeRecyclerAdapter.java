@@ -1,6 +1,5 @@
 package com.robelseyoum3.foodrecipes.adapters;
 
-import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,8 +7,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.RequestManager;
 import com.robelseyoum3.foodrecipes.R;
 import com.robelseyoum3.foodrecipes.models.Recipe;
 import com.robelseyoum3.foodrecipes.util.Constants;
@@ -27,10 +25,12 @@ public class RecipeRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
     private List<Recipe> mRecipes;
     private OnRecipeListener onRecipeListener;
+    private RequestManager requestManager;
 
 
-    public RecipeRecyclerAdapter(OnRecipeListener onRecipeListener) {
+    public RecipeRecyclerAdapter(OnRecipeListener onRecipeListener, RequestManager requestManager) {
         this.onRecipeListener = onRecipeListener;
+        this.requestManager = requestManager;
     }
 
     @NonNull
@@ -44,7 +44,7 @@ public class RecipeRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
             }
             case CATEGORY_TYPE: {
                 view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_category_list_item, parent, false);
-                return new CategoryViewHolder(view, onRecipeListener);
+                return new CategoryViewHolder(view, onRecipeListener, requestManager);
             }
             case EXHAUSTED_TYPE: {
                 view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_search_exhausted, parent, false);
@@ -53,7 +53,7 @@ public class RecipeRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
             case RECIPE_TYPE:
             default: {
                 view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_recipe_list_item, parent, false);
-                return new RecipeViewHolder(view, onRecipeListener);
+                return new RecipeViewHolder(view, onRecipeListener, requestManager);
             }
         }
     }
@@ -62,24 +62,9 @@ public class RecipeRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         int itemViewType =  getItemViewType(position);
         if(itemViewType == RECIPE_TYPE){
-            RequestOptions requestOptions = new RequestOptions()
-                    .placeholder(R.drawable.ic_launcher_background);
-            Glide.with(holder.itemView.getContext())
-                    .setDefaultRequestOptions(requestOptions)
-                    .load(mRecipes.get(position).getImage_url())
-                    .into(((RecipeViewHolder) holder).image);
-            ((RecipeViewHolder) holder).title.setText(mRecipes.get(position).getTitle());
-            ((RecipeViewHolder) holder).publisher.setText(mRecipes.get(position).getPublisher());
-            ((RecipeViewHolder) holder).socialScore.setText(String.valueOf((Math.round(mRecipes.get(position).getSocial_rank()))));
+            ((RecipeViewHolder) holder).onBind(mRecipes.get(position));
         } else if (itemViewType == CATEGORY_TYPE) {
-            RequestOptions requestOptions = new RequestOptions()
-                    .placeholder(R.drawable.ic_launcher_background);
-            Uri path = Uri.parse("android.resource://com.robelseyoum3.foodrecipes/drawable/" + mRecipes.get(position).getImage_url());
-            Glide.with(holder.itemView.getContext())
-                    .setDefaultRequestOptions(requestOptions)
-                    .load(path)
-                    .into(((CategoryViewHolder) holder).categoryImage);
-            ((CategoryViewHolder) holder).categoryTitle.setText(mRecipes.get(position).getTitle());
+            ((CategoryViewHolder) holder).onBind(mRecipes.get(position));
         }
     }
 

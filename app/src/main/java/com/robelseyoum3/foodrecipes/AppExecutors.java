@@ -19,9 +19,12 @@ public class AppExecutors {
         return  instance;
     }
 
-    private final Executor mDiskIO = Executors.newSingleThreadExecutor(); //to do it in background
+    //to do it in background
+    //responsible for all db operation on cache mainly, responsible all CRUD tasks from cache
+    private final Executor mDiskIO = Executors.newSingleThreadExecutor();
 
-    private final Executor mMainThreadExecutor = new MainThreadExecutor(); //send info if you are on background thread to the main Thread
+    //send info if you are on background thread to the main Thread
+    private final Executor mMainThreadExecutor = new MainThreadExecutor();
 
     public Executor getDiskIO() {
         return mDiskIO;

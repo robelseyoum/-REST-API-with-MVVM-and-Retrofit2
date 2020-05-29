@@ -11,6 +11,7 @@ public class ServiceGenerator {
     private static Retrofit.Builder retrofitBuilder =
             new Retrofit.Builder()
             .baseUrl(Constants.BASE_URL)
+                    //LiveDataCallAdapterFactory is used to produce LiveDataCallAdapter
                     .addCallAdapterFactory(new LiveDataCallAdapterFactory())
             .addConverterFactory(GsonConverterFactory.create());
 

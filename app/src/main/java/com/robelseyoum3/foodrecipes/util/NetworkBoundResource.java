@@ -41,6 +41,7 @@ public abstract class NetworkBoundResource<CacheObject, RequestObject> {
     private void init() {
         //update LiveData for loading status and set the data null bc nothing has retrieved yet
         //we are telling UI that something is happening and prepare for the next staff
+        /** 1) observe local db */
         results.setValue((Resource<CacheObject>) Resource.loading(null));
 
         //observe LiveData source from local db
@@ -52,6 +53,7 @@ public abstract class NetworkBoundResource<CacheObject, RequestObject> {
                         results.removeSource(dbSource);
                         //refresh the cache
                         if (shouldFetch(cacheObject)) {
+                            /** if (condition) query the network */
                             //get data from the network or query the network
                             fetchFromNetwork(dbSource);
                         } else {
@@ -105,12 +107,14 @@ public abstract class NetworkBoundResource<CacheObject, RequestObject> {
                     appExecutors.getDiskIO().execute(new Runnable() {
                         @Override
                         public void run() {
-                            //save the response to the local db
+                            //save the response to the local db it has to be done on background
                             saveCallResult((RequestObject) processResponse((ApiResponse.ApiSuccessResponse) requestObjectApiResponse));
+                            //  saveCallResult((RequestObject) ((ApiResponse.ApiSuccessResponse) requestObjectApiResponse).getBody());
 
                             appExecutors.mainThread().execute(new Runnable() {
                                 @Override
                                 public void run() {
+                                    //here loadFromDb() used is observing local database cache
                                     results.addSource(loadFromDb(), new Observer<CacheObject>() {
                                         @Override
                                         public void onChanged(CacheObject cacheObject) {
@@ -155,7 +159,7 @@ public abstract class NetworkBoundResource<CacheObject, RequestObject> {
 
     private void setValue(Resource<CacheObject> newValue) {
         if (results.getValue() != newValue) {
-            results.setValue(newValue);
+            results.setValue(newValue); //postvalue for background thread, setValue on mainthread
         }
     }
 

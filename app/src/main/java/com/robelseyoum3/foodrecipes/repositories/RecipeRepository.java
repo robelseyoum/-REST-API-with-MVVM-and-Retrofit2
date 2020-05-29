@@ -40,21 +40,23 @@ public class RecipeRepository {
 
             @Override
             protected void saveCallResult(@NonNull RecipeSearchResponse item) {
-                Recipe[] recipes = new Recipe[item.getRecipes().size()];
-                int index = 0;
-                for (long rowId : recipeDao.insertRecipes((Recipe[]) item.getRecipes().toArray(recipes))) {
-                    if (rowId == -1) {
-                        Log.d(TAG, "saveCallResult: CONFLICT.. This recipe is already in the cache");
-                        //if the recipe already exists.. I don't want to set the ingredients or timestamp b/c they will be erased
-                        recipeDao.updateRecipe(
-                                recipes[index].getRecipe_id(),
-                                recipes[index].getTitle(),
-                                recipes[index].getPublisher(),
-                                recipes[index].getImage_url(),
-                                recipes[index].getSocial_rank()
-                        );
+                if (item.getRecipes() != null) { //recipe list will be null if the api key is expired
+                    Recipe[] recipes = new Recipe[item.getRecipes().size()];
+                    int index = 0;
+                    for (long rowId : recipeDao.insertRecipes((Recipe[]) item.getRecipes().toArray(recipes))) {
+                        if (rowId == -1) {
+                            Log.d(TAG, "saveCallResult: CONFLICT.. This recipe is already in the cache");
+                            //if the recipe already exists.. I don't want to set the ingredients or timestamp b/c they will be erased
+                            recipeDao.updateRecipe(
+                                    recipes[index].getRecipe_id(),
+                                    recipes[index].getTitle(),
+                                    recipes[index].getPublisher(),
+                                    recipes[index].getImage_url(),
+                                    recipes[index].getSocial_rank()
+                            );
+                        }
+                        index++;
                     }
-                    index++;
                 }
             }
 

@@ -24,8 +24,8 @@ import com.robelseyoum3.foodrecipes.adapters.RecipeRecyclerAdapter;
 import com.robelseyoum3.foodrecipes.models.Recipe;
 import com.robelseyoum3.foodrecipes.util.Resource;
 import com.robelseyoum3.foodrecipes.util.VerticalSpacingItemDecorator;
-import com.robelseyoum3.foodrecipes.viewmodels.MyViewModelFactory;
 import com.robelseyoum3.foodrecipes.viewmodels.RecipeListViewModel;
+import com.robelseyoum3.foodrecipes.viewmodels.RecipeListViewModelFactory;
 
 import java.util.List;
 
@@ -46,7 +46,7 @@ public class RecipeListActivity extends BaseActivity implements OnRecipeListener
         mRecyclerView = findViewById(R.id.recycler_recipe_list);
         mSearchView = findViewById(R.id.search_view);
 
-        mRecipeListViewModel = new ViewModelProvider(this, new MyViewModelFactory(this.getApplication())).get(RecipeListViewModel.class);
+        mRecipeListViewModel = new ViewModelProvider(this, new RecipeListViewModelFactory(this.getApplication())).get(RecipeListViewModel.class);
 
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
 

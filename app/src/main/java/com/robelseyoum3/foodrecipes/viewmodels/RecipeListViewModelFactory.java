@@ -6,11 +6,11 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
-public class MyViewModelFactory implements ViewModelProvider.Factory {
+public class RecipeListViewModelFactory implements ViewModelProvider.Factory {
 
     private Application mApplication;
 
-    public MyViewModelFactory(Application application) {
+    public RecipeListViewModelFactory(Application application) {
         mApplication = application;
     }
 

@@ -9,10 +9,13 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatImageView;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.robelseyoum3.foodrecipes.models.Recipe;
+import com.robelseyoum3.foodrecipes.util.Resource;
 import com.robelseyoum3.foodrecipes.viewmodels.RecipeViewModel;
+import com.robelseyoum3.foodrecipes.viewmodels.RecipeViewModelFactory;
 
 public class RecipeActivity extends BaseActivity {
 
@@ -35,8 +38,7 @@ public class RecipeActivity extends BaseActivity {
         mRecipeRank = findViewById(R.id.recipe_social_score);
         mRecipeIngredientsContainer = findViewById(R.id.ingredients_container);
         mScrollView = findViewById(R.id.parent);
-        mRecipeViewModel = new ViewModelProvider(this).get(RecipeViewModel.class);
-
+        mRecipeViewModel = new ViewModelProvider(this, new RecipeViewModelFactory(this.getApplication())).get(RecipeViewModel.class);
         getIncomingIntent();
     }
 
@@ -44,12 +46,44 @@ public class RecipeActivity extends BaseActivity {
         if (getIntent().hasExtra("recipe")) {
             Recipe recipe = getIntent().getParcelableExtra("recipe");
             Log.d(TAG, "getIncomingIntent: " + recipe.getTitle());
+            subscribeObserver(recipe.getRecipe_id());
         }
     }
 
 
     private void showParent() {
         mScrollView.setVisibility(View.VISIBLE);
+    }
+
+    private void subscribeObserver(final String recipeId) {
+        mRecipeViewModel.searchRecipeApi(recipeId).observe(this, new Observer<Resource<Recipe>>() {
+            @Override
+            public void onChanged(Resource<Recipe> recipeResource) {
+                if (recipeResource != null) {
+                    if (recipeResource.data != null) {
+                        switch (recipeResource.status) {
+                            case LOADING: {
+                                showProgressBAr(true);
+                                break;
+                            }
+                            case ERROR: {
+                                Log.e(TAG, "onChanged: status : ERROR, Recipe: " + recipeResource.data.getTitle());
+                                Log.e(TAG, "onChanged: EROROR message: " + recipeResource.message);
+                                showProgressBAr(false);
+                                break;
+                            }
+                            case SUCCESS: {
+                                Log.d(TAG, "onChanged: cache has been refereshed");
+                                Log.d(TAG, "onChanged: status: SUCCESS, Recipe: " + recipeResource.data.getTitle());
+                                showParent();
+                                showProgressBAr(false);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        });
     }
 
 }

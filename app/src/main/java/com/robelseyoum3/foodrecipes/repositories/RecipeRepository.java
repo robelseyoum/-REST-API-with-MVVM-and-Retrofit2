@@ -84,7 +84,7 @@ public class RecipeRepository {
         }.getAsLiveData();
     }
 
-    public LiveData<Resource<Recipe>> searchRecipesApi(final String recipeId) {
+    public LiveData<Resource<Recipe>> searchRecipeApi(final String recipeId) {
         return new NetworkBoundResource<Recipe, RecipeResponse>(AppExecutors.getInstance()) {
 
             @Override

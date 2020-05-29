@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.Observer;
@@ -116,7 +117,9 @@ public class RecipeListActivity extends BaseActivity implements OnRecipeListener
 
 
     private void searchRecipeApi(String query) {
+        mRecyclerView.smoothScrollToPosition(0);
         mRecipeListViewModel.searchRecipesApi(query, 1);
+        mSearchView.clearFocus();
     }
 
     private void displayCategories() {
@@ -130,12 +133,26 @@ public class RecipeListActivity extends BaseActivity implements OnRecipeListener
         return Glide.with(this)
                 .setDefaultRequestOptions(options);
     }
+
     private void initRecyclerView() {
         mRecipeRecyclerAdapter = new RecipeRecyclerAdapter(this, initGlide());
         VerticalSpacingItemDecorator itemDecorator = new VerticalSpacingItemDecorator(30);
-        mRecyclerView.setAdapter(mRecipeRecyclerAdapter);
         mRecyclerView.addItemDecoration(itemDecorator);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+
+                if (!mRecyclerView.canScrollVertically(1)
+                        && mRecipeListViewModel.getViewState().getValue() == RecipeListViewModel.ViewState.RECIPES) {
+                    mRecipeListViewModel.searchNextPage();
+                }
+            }
+        });
+
+        mRecyclerView.setAdapter(mRecipeRecyclerAdapter);
     }
 
 
@@ -166,7 +183,5 @@ public class RecipeListActivity extends BaseActivity implements OnRecipeListener
     public void onCategoryClick(String category) {
         searchRecipeApi(category);
     }
-
-
 
 }
